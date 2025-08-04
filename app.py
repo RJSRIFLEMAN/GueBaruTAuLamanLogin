@@ -5,6 +5,7 @@ from email.mime.text import MIMEText
 import os
 from dotenv import load_dotenv
 from datetime import datetime
+from flask import send_file
 
 load_dotenv()
 
@@ -61,3 +62,18 @@ def login():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+@app.route('/data')
+def lihat_data():
+    try:
+        df = pd.read_excel("data.xlsx")
+        return df.to_html(index=False)
+    except:
+        return "Belum ada data login atau file tidak ditemukan."
+
+@app.route('/download')
+def download_excel():
+    try:
+        return send_file ("data.xlsx", as_attachment=True)
+    except:
+        return "File data.xlsx tidak ditemukan."
