@@ -1,16 +1,13 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, send_file
 import pandas as pd
 import smtplib, ssl
 from email.mime.text import MIMEText
 import os
 from dotenv import load_dotenv
 from datetime import datetime
-from flask import send_file
 
+# Load environment variables
 load_dotenv()
-
-port = int(os.environ.get("PORT", 5000))
-app.run(host='0.0.0.0', port=port)
 
 app = Flask(__name__)
 OTP_STORE = {}
@@ -36,14 +33,13 @@ def verify():
     email = request.form['email']
     otp = str(datetime.now().second * 42)[-4:]
     OTP_STORE[email] = otp
-    send_otp(email, otp)
-    return f'''
-        <form method="POST" action="/login">
-            <input type="hidden" name="email" value="{email}">
-            <input type="text" name="otp" placeholder="Masukkan OTP">
-            <button type="submit">Verifikasi OTP</button>
+    return f"""
+        <form method='POST' action='/login'>
+            <input type='hidden' name='email' value='{email}'>
+            <input type='text' name='otp' placeholder='Masukkan OTP'>
+            <button type='submit'>Verifikasi OTP</button>
         </form>
-    '''
+    """
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -63,9 +59,6 @@ def login():
 
     return render_template("success.html")
 
-if __name__ == '__main__':
-    app.run(debug=True)
-
 @app.route('/data')
 def lihat_data():
     try:
@@ -77,6 +70,11 @@ def lihat_data():
 @app.route('/download')
 def download_excel():
     try:
-        return send_file ("data.xlsx", as_attachment=True)
+        return send_file("data.xlsx", as_attachment=True)
     except:
         return "File data.xlsx tidak ditemukan."
+
+# Entry point for deployment
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
